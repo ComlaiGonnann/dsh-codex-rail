@@ -21,7 +21,7 @@ Transforms **DeepSeek Harness (DSH)** into a sleek, immersive **Codex-style dual
 
 > [!NOTE]
 > **Author Disclaimer: This project is for personal use by the author and is a product of vibecoding.**  
-> Crafted with the philosophy of "if it works, it's a win; visual aesthetics and flow first", designed for deep daily immersion in DeepSeek Harness. Feature roadmap and evolution are primarily driven by the author's personal workflow. Feedback, suggestions, and PRs are warmly welcomed!
+> Crafted to bring a sleek, distraction-free, and immersive Codex dual-column workflow to DeepSeek Harness. Feature evolution and maintenance are primarily tailored to the author's daily workflow. Feedback, suggestions, and PRs are warmly welcomed!
 
 ### ✨ Key Features
 
@@ -93,7 +93,7 @@ mklink /J "%USERPROFILE%\.dsh\packages\dsh-codex-rail" "path\to\dsh-codex-rail"
 
 > [!NOTE]
 > **作者声明：此为作者自用且为 vibecoding 产物。**  
-> 本插件遵循“能跑即是胜利、视觉体验优先”的设计哲学，旨在复刻沉浸式 Codex 顶栏与侧边栏工作流。更新节奏与功能演变以作者日常使用体验为主要驱动，欢迎交流与 PR！
+> 本插件旨在为 DeepSeek Harness 打造精致沉浸的 Codex 双列活动栏与顶栏一体化视觉体验。功能演变与日常维护主要依据作者个人实际工作流展开，欢迎交流体验与提交 PR！
 
 ### ✨ 核心特性
 
