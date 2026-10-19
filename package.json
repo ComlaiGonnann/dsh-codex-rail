@@ -1,8 +1,8 @@
 {
-  "name": "dsh-codex-sidebar",
-  "version": "1.1.0",
-  "displayName": "Codex Sidebar & Activity Rail",
-  "description": "Transforms DSH sidebar into a dual-column Codex interface with an integrated Activity Bar, unified topbar, avatar quick access, and smooth session navigation.",
+  "name": "dsh-codex-rail",
+  "version": "1.2.0",
+  "displayName": "Codex Rail & Integrated Deck",
+  "description": "Transforms DSH into a sleek dual-column Codex workspace with an integrated Activity Bar, unified topbar, avatar quick access, and smooth session history navigation.",
   "type": "module",
   "main": "lib/index.js",
   "exports": {
@@ -16,23 +16,24 @@
   },
   "keywords": [
     "dsh-plugin",
+    "dsh-codex-rail",
     "deepseek",
     "deepseek-harness",
     "dsh",
     "codex",
-    "sidebar",
     "activity-bar",
+    "sidebar",
     "ui-theme",
     "vibecoding"
   ],
   "author": "ComlaiGonnann",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ComlaiGonnann/dsh-codex-sidebar.git"
+    "url": "git+https://github.com/ComlaiGonnann/dsh-codex-rail.git"
   },
-  "homepage": "https://github.com/ComlaiGonnann/dsh-codex-sidebar#readme",
+  "homepage": "https://github.com/ComlaiGonnann/dsh-codex-rail#readme",
   "bugs": {
-    "url": "https://github.com/ComlaiGonnann/dsh-codex-sidebar/issues"
+    "url": "https://github.com/ComlaiGonnann/dsh-codex-rail/issues"
   },
   "license": "MIT",
   "dsh": {
