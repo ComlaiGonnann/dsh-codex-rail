@@ -1,0 +1,56 @@
+{
+  "name": "dsh-codex-sidebar",
+  "version": "1.1.0",
+  "displayName": "Codex Sidebar & Activity Rail",
+  "description": "Transforms DSH sidebar into a dual-column Codex interface with an integrated Activity Bar, unified topbar, avatar quick access, and smooth session navigation.",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": {
+      "default": "./lib/index.js"
+    },
+    "./client": {
+      "default": "./lib/client.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "keywords": [
+    "dsh-plugin",
+    "deepseek",
+    "deepseek-harness",
+    "dsh",
+    "codex",
+    "sidebar",
+    "activity-bar",
+    "ui-theme",
+    "vibecoding"
+  ],
+  "author": "ComlaiGonnann",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ComlaiGonnann/dsh-codex-sidebar.git"
+  },
+  "homepage": "https://github.com/ComlaiGonnann/dsh-codex-sidebar#readme",
+  "bugs": {
+    "url": "https://github.com/ComlaiGonnann/dsh-codex-sidebar/issues"
+  },
+  "license": "MIT",
+  "dsh": {
+    "engines": {
+      "dsh": ">=0.1.1-rc.1"
+    },
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "inject": [
+        "@deepseek-ai/dsh-client-runtime"
+      ],
+      "platform": "web",
+      "immediately": true
+    }
+  },
+  "peerDependencies": {
+    "react": "^18.2.0"
+  }
+}
