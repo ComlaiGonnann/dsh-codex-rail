@@ -2,7 +2,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/DSH-Plugin-blue?style=flat-square" alt="DSH Plugin" />
-  <img src="https://img.shields.io/badge/Version-1.2.0-green?style=flat-square" alt="Version 1.2.0" />
+  <img src="https://img.shields.io/badge/Version-1.3.0-green?style=flat-square" alt="Version 1.3.0" />
   <img src="https://img.shields.io/badge/License-MIT-purple?style=flat-square" alt="License MIT" />
   <img src="https://img.shields.io/badge/Vibe%20Coding-%E2%9C%A8-orange?style=flat-square" alt="Vibe Coding" />
 </p>
@@ -28,8 +28,11 @@
   - **48px 图标活动栏**：将插件、终端、浏览器、工作区切换等功能归拢于左侧纵向 Rail，布局井然有序；
   - **弹性会话面板**：侧边列表支持平滑收展，留出最大化的主对话与编码视野。
 
-- 👤 **快捷账号中心与头像入口**  
-  在活动栏底部常驻 28px 精美圆形头像与个人中心入口，点击即可直接呼出或定位到账号与模型配置。
+- 👤 **快捷账号中心与水晶头像入口**  
+  在活动栏底部常驻 30px 精美圆形水晶微质感头像与个人中心入口，点击即可直接呼出或定位到账号与模型配置。
+
+- 🌈 **壁纸引擎无缝透光与毛玻璃兼容**  
+  深度适配 Wallpaper Engine 壁纸插件，无缝支持液态磨砂毛玻璃（Liquid Glass）、侧边栏亚克力与全透模式（Full Clear）。
 
 - ⚡ **会话前进 / 后退历史导航**  
   内置导航控制按键，并原生支持 <kbd>Alt</kbd> + <kbd>←</kbd>（后退）和 <kbd>Alt</kbd> + <kbd>→</kbd>（前进）全局快捷键，顺畅穿梭于多轮历史会话。
@@ -77,7 +80,7 @@ mklink /J "%USERPROFILE%\.dsh\packages\dsh-codex-rail" "你的本地仓库路径
 ```
 
 ## ⚙️ 兼容性说明
-- **兼容 DSH 版本**：`>= 0.1.1-rc.1`（完美兼容 0.2.x Desktop / Web）
+- **兼容 DSH 版本**：`>= 0.1.1-rc.1`（完美支持 DSH 0.2.0 / 0.2.1-rc.1 / 0.2.1-rc.2 Desktop 与 Web）
 - **适用平台**：Windows / macOS / Linux
 
 ## 📄 开源许可
