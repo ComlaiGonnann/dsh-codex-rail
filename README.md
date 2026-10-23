@@ -2,7 +2,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/DSH-Plugin-blue?style=flat-square" alt="DSH Plugin" />
-  <img src="https://img.shields.io/badge/Version-1.3.1-green?style=flat-square" alt="Version 1.3.1" />
+  <img src="https://img.shields.io/badge/Version-1.3.2-green?style=flat-square" alt="Version 1.3.2" />
   <img src="https://img.shields.io/badge/License-MIT-purple?style=flat-square" alt="License MIT" />
   <img src="https://img.shields.io/badge/Vibe%20Coding-%E2%9C%A8-orange?style=flat-square" alt="Vibe Coding" />
 </p>
@@ -83,7 +83,7 @@ mklink /J "%USERPROFILE%\.dsh\packages\dsh-codex-rail" "path\to\dsh-codex-rail"
 ```
 
 ### ⚙️ Compatibility
-- **Compatible with DSH**: `>= 0.1.1-rc.1` (Full native support for DSH 0.2.0 / 0.2.1-rc.1 / 0.2.1-rc.2 Desktop & Web)
+- **Compatible with DSH**: `>= 0.1.1-rc.1` (Full native support for DSH 0.2.0 / 0.2.1-rc.1 / 0.2.1-rc.2 / 0.2.1-rc.3 Desktop & Web)
 - **Platforms**: Windows / macOS / Linux
 
 ---
@@ -159,7 +159,7 @@ mklink /J "%USERPROFILE%\.dsh\packages\dsh-codex-rail" "你的本地仓库路径
 ```
 
 ### ⚙️ 兼容性说明
-- **兼容 DSH 版本**：`>= 0.1.1-rc.1`（完美支持 DSH 0.2.0 / 0.2.1-rc.1 / 0.2.1-rc.2 Desktop 与 Web）
+- **兼容 DSH 版本**：`>= 0.1.1-rc.1`（完美支持 DSH 0.2.0 / 0.2.1-rc.1 / 0.2.1-rc.2 / 0.2.1-rc.3 Desktop 与 Web）
 - **适用平台**：Windows / macOS / Linux
 
 ---
