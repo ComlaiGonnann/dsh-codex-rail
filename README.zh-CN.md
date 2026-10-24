@@ -2,7 +2,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/DSH-Plugin-blue?style=flat-square" alt="DSH Plugin" />
-  <img src="https://img.shields.io/badge/Version-1.3.2-green?style=flat-square" alt="Version 1.3.2" />
+  <img src="https://img.shields.io/badge/Version-1.3.3-green?style=flat-square" alt="Version 1.3.3" />
   <img src="https://img.shields.io/badge/License-MIT-purple?style=flat-square" alt="License MIT" />
   <img src="https://img.shields.io/badge/Vibe%20Coding-%E2%9C%A8-orange?style=flat-square" alt="Vibe Coding" />
 </p>
@@ -24,9 +24,10 @@
 - 🎨 **全窗顶栏一体化质感**  
   无缝打通原生标题栏与 48px 活动栏（Activity Rail），彻底消除断层与多余留白，与原生明亮/暗黑主题深度贴合。
 
-- 🗂️ **Codex 级双列工作流**  
-  - **48px 图标活动栏**：将插件、终端、浏览器、工作区切换等功能归拢于左侧纵向 Rail，布局井然有序；
-  - **弹性会话面板**：侧边列表支持平滑收展，留出最大化的主对话与编码视野。
+- 🗂️ **Codex 级双列工作流与自适应 Popover 锚定**  
+  - **48px 图标活动栏**：将插件、终端、浏览器、工作区切换以及 DSH 0.2.1-rc.3 原生「更多/创建插件」菜单归拢于左侧纵向 Rail，毫秒级浮层对齐，布局井然有序；
+  - **弹性会话面板**：侧边列表支持平滑收展，留出最大化的主对话与编码视野；
+  - **全套 Codex 专属图标**：深度适配个性化推荐（灵感火花 Sparkle）、更多菜单（三点水平排列）、技能探索与看板等专属矢量图形。
 
 - 👤 **快捷账号中心与水晶头像入口**  
   在活动栏底部常驻 30px 精美圆形水晶微质感头像与个人中心入口，点击即可直接呼出或定位到账号与模型配置。
