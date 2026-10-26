@@ -2,7 +2,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/DSH-Plugin-blue?style=flat-square" alt="DSH Plugin" />
-  <img src="https://img.shields.io/badge/Version-1.3.3-green?style=flat-square" alt="Version 1.3.3" />
+  <img src="https://img.shields.io/badge/Version-1.3.4-green?style=flat-square" alt="Version 1.3.4" />
   <img src="https://img.shields.io/badge/License-MIT-purple?style=flat-square" alt="License MIT" />
   <img src="https://img.shields.io/badge/Vibe%20Coding-%E2%9C%A8-orange?style=flat-square" alt="Vibe Coding" />
 </p>
@@ -47,6 +47,9 @@ Transforms **DeepSeek Harness (DSH)** into a sleek, immersive **Codex-style dual
 
 - 🚀 **Buttery-Smooth Animations**  
   Optimized CSS transform transitions and GPU repaint boundaries, completely eliminating frame drops during sidebar expand and collapse.
+
+- ⚡ **Idle & Debounced Sync Engine**  
+  120ms debounced synchronization combined with browser-native `requestIdleCallback` (with 300ms fallback timeout) and `__dshHtml` update fingerprinting, eliminating redundant DOM queries and innerHTML rewrites during high-frequency chat streaming.
 
 ### ⌨️ Keybindings
 
@@ -123,6 +126,9 @@ mklink /J "%USERPROFILE%\.dsh\packages\dsh-codex-rail" "path\to\dsh-codex-rail"
 
 - 🚀 **丝滑动画与高帧率过渡**  
   深度优化 CSS Transform 与浏览器重绘机制，彻底解决原生在侧边栏折叠与展开时的掉帧卡顿。
+
+- ⚡ **智能空闲调度与高频 DOM 防抖 (Idle & Debounced Sync Engine)**  
+  采用 120ms 动态防抖与浏览器原生 `requestIdleCallback`（300ms 超时保护），配合活动栏按钮 `__dshHtml` 缓存指纹，彻底消除高频对话流与侧边栏变动时的多余 DOM 重排与重绘开销。
 
 ### ⌨️ 快捷键速查
 
