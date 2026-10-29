@@ -2,7 +2,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/DSH-Plugin-blue?style=flat-square" alt="DSH Plugin" />
-  <img src="https://img.shields.io/badge/Version-1.3.6-green?style=flat-square" alt="Version 1.3.6" />
+  <img src="https://img.shields.io/badge/Version-1.3.7-green?style=flat-square" alt="Version 1.3.7" />
   <img src="https://img.shields.io/badge/License-MIT-purple?style=flat-square" alt="License MIT" />
   <img src="https://img.shields.io/badge/Vibe%20Coding-%E2%9C%A8-orange?style=flat-square" alt="Vibe Coding" />
 </p>
@@ -31,7 +31,7 @@ Transforms **DeepSeek Harness (DSH)** into a sleek, immersive **Codex-style dual
 - 🗂️ **Codex Dual-Column Layout & Adaptive Popover Alignment**  
   - **48px Activity Rail**: Consolidates plugins, web browser, terminal, workspace switchers, and upstream DSH 0.2.1-rc.3 / 0.2.1-rc.4 / 0.2.2-alpha.2 More/Customization menus into a sleek vertical navigation column with millisecond-precision popover docking;
   - **Flexible Drawer Panel**: History sessions and side drawers slide smoothly, maximizing your conversation and coding viewport;
-  - **Rich Codex Iconography**: Native dedicated SVG icons for Personalized Recommendations (Sparkle / 0.2.1-rc.4 icon), Runtime Stats & Inspector (0.2.2-alpha.2 DevTools), Git Worktree & PRs (0.2.2-alpha.2 Change Requests), Subagent OAR CLI, More Menus (Triple Dot), Skill Explorer, and Taskboard.
+  - **Rich Codex Iconography**: Native dedicated SVG icons for LiveShare Collaboration (0.2.2-alpha.2 Share action), Personalized Recommendations (Sparkle / 0.2.1-rc.4 icon), Runtime Stats & Inspector (0.2.2-alpha.2 DevTools), Git Worktree & PRs (0.2.2-alpha.2 Change Requests), Subagent OAR CLI, More Menus (Triple Dot), Skill Explorer, and Taskboard.
 
 - 👤 **Quick Account Center & Avatar Access**  
   A dedicated 30px circular crystal avatar entry is pinned at the bottom of the Activity Rail for instant one-click access to account, profile, and model settings.
@@ -110,7 +110,7 @@ mklink /J "%USERPROFILE%\.dsh\packages\dsh-codex-rail" "path\to\dsh-codex-rail"
 - 🗂️ **Codex 级双列工作流与自适应 Popover 锚定**  
   - **48px 图标活动栏**：将插件、终端、浏览器、工作区切换以及 DSH 0.2.1-rc.3 / 0.2.1-rc.4 / 0.2.2-alpha.2 原生「更多/创建插件」菜单归拢于左侧纵向 Rail，毫秒级浮层对齐，布局井然有序；
   - **弹性会话面板**：侧边列表支持平滑收展，留出最大化的主对话与编码视野；
-  - **全套 Codex 专属图标**：深度适配个性化推荐（0.2.1-rc.4 官方灵感徽标 / Sparkle）、开发者工具与运行统计（0.2.2-alpha.2 Stats）、Git 工作树与变更请求（0.2.2-alpha.2 Worktree）、Subagent OAR 协同、更多菜单（三点水平排列）、技能探索与看板等专属矢量图形。
+  - **全套 Codex 专属图标**：深度适配 LiveShare 协作共享（0.2.2-alpha.2 实时协作）、个性化推荐（0.2.1-rc.4 官方灵感徽标 / Sparkle）、开发者工具与运行统计（0.2.2-alpha.2 Stats）、Git 工作树与变更请求（0.2.2-alpha.2 Worktree）、Subagent OAR 协同、更多菜单（三点水平排列）、技能探索与看板等专属矢量图形。
 
 - 👤 **快捷账号中心与水晶头像入口**  
   在活动栏底部常驻 30px 精美圆形水晶微质感头像与个人中心入口，点击即可直接呼出或定位到账号与模型配置。
