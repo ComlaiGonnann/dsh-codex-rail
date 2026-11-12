@@ -2,7 +2,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/DSH-Plugin-blue?style=flat-square" alt="DSH Plugin" />
-  <img src="https://img.shields.io/badge/Version-1.3.11-green?style=flat-square" alt="Version 1.3.11" />
+  <img src="https://img.shields.io/badge/Version-1.3.12-green?style=flat-square" alt="Version 1.3.12" />
   <img src="https://img.shields.io/badge/License-MIT-purple?style=flat-square" alt="License MIT" />
   <img src="https://img.shields.io/badge/Vibe%20Coding-%E2%9C%A8-orange?style=flat-square" alt="Vibe Coding" />
 </p>
@@ -25,21 +25,24 @@
   无缝打通原生标题栏与 48px 活动栏（Activity Rail），彻底消除断层与多余留白，与原生明亮/暗黑主题深度贴合。
 
 - 🗂️ **Codex 级双列工作流与自适应 Popover 锚定**  
-  - **48px 图标活动栏**：将插件、终端、浏览器、工作区切换以及 DSH 0.2.1-rc.3 ~ rc.5、0.2.2-alpha.2 ~ alpha.3、0.2.2-rc.1 原生「更多/创建插件」菜单归拢于左侧纵向 Rail，毫秒级浮层对齐，布局井然有序；
+  - **48px 图标活动栏**：将插件、终端、浏览器、工作区切换以及 DSH 0.2.1-rc.3 ~ rc.5、0.2.2-alpha.2 ~ alpha.3、0.2.2-rc.1 ~ rc.2 原生「更多/创建插件」菜单归拢于左侧纵向 Rail，毫秒级浮层对齐，布局井然有序；
   - **弹性会话面板**：侧边列表支持平滑收展，留出最大化的主对话与编码视野；
-  - **全套 Codex 专属图标**：深度适配 Forge 代码审查与 Git 工作树（0.2.2-alpha.3 & 0.2.2-rc.1 Change Requests / PR 审查）、补丁应用与变更检视（0.2.1-rc.5 apply_patch / 交付物审核）、LiveShare 协作共享（0.2.2-alpha.2 实时协作）、个性化推荐（0.2.1-rc.4 官方灵感徽标 / Sparkle）、开发者工具与运行统计（0.2.2-alpha.2 Stats）、Subagent OAR 协同、更多菜单（三点水平排列）、技能探索与看板等专属矢量图形。
+  - **全套 Codex 专属图标**：深度适配 Forge 代码审查与 Git 工作树（0.2.2-alpha.3 ~ 0.2.2-rc.2 Change Requests / PR 审查）、补丁应用与变更检视（0.2.1-rc.5 apply_patch / 交付物审核）、LiveShare 协作共享（0.2.2-alpha.2 实时协作）、个性化推荐（0.2.1-rc.4 官方灵感徽标 / Sparkle）、开发者工具与运行统计（0.2.2-alpha.2 Stats）、Subagent OAR 协同、更多菜单（三点水平排列）、技能探索与看板等专属矢量图形。
 
-- 🧩 **DockKit 多标签面板系统与右侧分栏适配 (DSH 0.2.2-rc.1)**  
-  全量深度适配 DSH 0.2.2-rc.1 全新引入的 DockKit 标签页与分栏拖拽体系（`[data-dockkit-*]`）。重绘 DockKit 顶部标签栏（Strip）、标签项悬浮与激活态、平滑中键快速关闭标签页、分割控制柄与独立浮动窗（Float Window），呈现纯正 Codex 轻量极简科技质感。
+- 🧩 **DockKit 多标签面板系统与分栏放置区适配 (DSH 0.2.2-rc.1 & 0.2.2-rc.2)**  
+  全量深度适配 DSH 0.2.2-rc.1 & 0.2.2-rc.2 全新引入的 DockKit 标签页与分栏拖拽体系（`[data-dockkit-*]`）。重绘 DockKit 顶部标签栏（Strip）、标签项悬浮与激活态、平滑中键快速关闭标签页、分割控制柄、浮动窗（Float Window）以及 0.2.2-rc.2 分栏拖拽放置区高亮卡片（`[data-dockkit-dock-zone]` / `[data-dockkit-drop-active]` / `[data-dockkit-drop-zones]`），呈现纯正 Codex 轻量极简科技质感。
 
-- 💬 **输入框引用与紧凑预览胶囊卡片 (DSH 0.2.2-rc.1)**  
-  完美契合 DSH 0.2.2-rc.1 引用文本插入与紧凑预览特性（`[data-quote-preview]` / `[data-ref-chip]`）。针对输入框引用胶囊赋予精致微圆角与暗黑半透明边框，搭配毛玻璃浮层与一键移除微动效，让长文本引文和多轮对话阅读更为紧凑自然。
+- 💬 **输入框引用与紧凑预览胶囊卡片 (DSH 0.2.2-rc.1 & 0.2.2-rc.2)**  
+  完美契合 DSH 0.2.2-rc.1 & 0.2.2-rc.2 引用文本插入与紧凑预览特性（`[data-quote-preview]` / `[data-ref-chip]` / `[data-close-mark]`）。针对输入框引用胶囊赋予精致微圆角与暗黑半透明边框，搭配毛玻璃浮层与一键移除微动效，让长文本引文和多轮对话阅读更为紧凑自然。
 
-- 🛠️ **Forge 套件与代码审查深度融合 (DSH 0.2.2-alpha.3 & 0.2.2-rc.1)**  
+- 🛠️ **Forge 套件与代码审查深度融合 (DSH 0.2.2-alpha.3 ~ 0.2.2-rc.2)**  
   全面视觉化适配 DSH 官方 Forge 子系统（`@deepseek-ai/dsh-experimental-forge-bundle` 与 `@deepseek-ai/dsh-experimental-client-ui-forge`）。精调会话顶栏变更请求（Change Requests）状态入口与检查红绿圆点、右侧栏多页签 Diff 变更视图、代码 Hunk 行内行号与评论弹框、以及输入框上方的 Worktree 创建进度卡片，保持极致丝滑的 Codex 科技暗黑质感。
 
-- 🧭 **会话悬浮卡工作目录标签与全局上下文菜单 (DSH 0.2.2-rc.1)**  
-  优雅呈现 0.2.2-rc.1 侧栏悬浮卡新增的工作目录标识（`[data-path-clipped]` / `[data-path-label]`），采用等宽微字号清晰区分同名会话；深度强化全局统一右键菜单材质与阶段过渡（`[data-menu-material]` / `[data-menu-phase]` / `[data-menu-group]`），提升毛玻璃磨砂阴影与层级分类质感。
+- 🧭 **会话悬浮卡工作目录标签与全局上下文菜单 (DSH 0.2.2-rc.1 & 0.2.2-rc.2)**  
+  优雅呈现 0.2.2-rc.1 & 0.2.2-rc.2 侧栏悬浮卡新增的工作目录标识（`[data-path-clipped]` / `[data-path-label]`），采用等宽微字号清晰区分同名会话；深度强化全局统一右键菜单材质、子菜单布局与触发器按钮（`[data-context-menu-trigger]` / `[data-submenu-layout]` / `[data-menu-material]` / `[data-menu-phase]` / `[data-menu-group]`），提升毛玻璃磨砂阴影与层级分类质感。
+
+- 🪟 **桌面窗口拖拽排除与顶栏深度融合 (DSH 0.2.2-rc.2 Desktop)**  
+  全面接入 DSH 0.2.2-rc.2 桌面窗口拖拽规范（`[data-windows-titlebar]` 与 `[data-window-drag]`），对 Activity Rail 独立活动栏与顶栏前进/后退/折叠控件施加 `-webkit-app-region: no-drag` 与 `[data-window-drag-exclude]` 保护，彻底解决 Windows / macOS 桌面端顶栏拖拽阻断按钮点击的问题。
 
 - 👤 **快捷账号中心与水晶头像入口**  
   在活动栏底部常驻 30px 精美圆形水晶微质感头像与个人中心入口，点击即可直接呼出或定位到账号与模型配置。
@@ -57,10 +60,10 @@
   深度优化 CSS Transform 与浏览器重绘机制，彻底解决原生在侧边栏折叠与展开时的掉帧卡顿。
 
 - ⚡ **智能空闲调度与高频 DOM 防抖 (Idle & Debounced Sync Engine)**  
-  采用 120ms 动态防抖与浏览器原生 `requestIdleCallback`（300ms 超时保护），配合活动栏按钮 `__dshHtml` 缓存指纹；深度适配 DSH 0.2.1-rc.5 思维链流式推理展示、0.2.2-alpha.2 右侧栏文档预览与协作面板、0.2.2-alpha.3 Forge 大量 Diff Hunk，以及 0.2.2-rc.1 DockKit 多标签、引用预览与上下文菜单，彻底阻断高频重绘与多余 DOM 重排开销。
+  采用 120ms 动态防抖与浏览器原生 `requestIdleCallback`（300ms 超时保护），配合活动栏按钮 `__dshHtml` 缓存指纹；深度适配 DSH 0.2.1-rc.5 思维链流式推理展示、0.2.2-alpha.2 右侧栏文档预览与协作面板、0.2.2-alpha.3 Forge 大量 Diff Hunk，以及 0.2.2-rc.1 & 0.2.2-rc.2 DockKit 分栏拖拽/放置区、引用预览与上下文菜单，彻底阻断高频重绘与多余 DOM 重排开销。
 
 - 🪟 **右侧栏与多端视口自适应联动 (Right Sidebar & Expand Control)**  
-  深度兼容 DSH master、0.2.2-alpha.2、0.2.2-alpha.3 及 0.2.2-rc.1 视口宽度响应式规范，优化会话顶栏角落 `[data-sidebar-right-expand]` 及 `[data-forge-header]` 展开/折叠控件质感，对手机与平板窄屏（< 768px）和软键盘提供弹性自适应支持，与 Codex 沉浸双列及浮动卡片保持毫秒级无缝联动。
+  深度兼容 DSH master、0.2.2-alpha.2、0.2.2-alpha.3 及 0.2.2-rc.1 ~ rc.2 视口宽度响应式规范，优化会话顶栏角落 `[data-sidebar-right-expand]` 及 `[data-forge-header]` 展开/折叠控件质感，对手机与平板窄屏（< 768px）和软键盘提供弹性自适应支持，与 Codex 沉浸双列及浮动卡片保持毫秒级无缝联动。
 
 ## ⌨️ 快捷键速查
 
@@ -99,7 +102,7 @@ mklink /J "%USERPROFILE%\.dsh\packages\dsh-codex-rail" "你的本地仓库路径
 ```
 
 ## ⚙️ 兼容性说明
-- **兼容 DSH 版本**：`>= 0.1.1-rc.1`（完美支持 DSH 0.2.0 / 0.2.1-rc.1 ~ rc.5 / 0.2.2-alpha.2 ~ alpha.3 / 0.2.2-rc.1 Desktop 与 Web）
+- **兼容 DSH 版本**：`>= 0.1.1-rc.1`（完美支持 DSH 0.2.0 / 0.2.1-rc.1 ~ rc.5 / 0.2.2-alpha.2 ~ alpha.3 / 0.2.2-rc.1 ~ rc.2 Desktop 与 Web）
 - **适用平台**：Windows / macOS / Linux
 
 ## 📄 开源许可
