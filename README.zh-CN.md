@@ -2,7 +2,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/DSH-Plugin-blue?style=flat-square" alt="DSH Plugin" />
-  <img src="https://img.shields.io/badge/Version-1.3.12-green?style=flat-square" alt="Version 1.3.12" />
+  <img src="https://img.shields.io/badge/Version-1.3.13-green?style=flat-square" alt="Version 1.3.13" />
   <img src="https://img.shields.io/badge/License-MIT-purple?style=flat-square" alt="License MIT" />
   <img src="https://img.shields.io/badge/Vibe%20Coding-%E2%9C%A8-orange?style=flat-square" alt="Vibe Coding" />
 </p>
@@ -20,6 +20,12 @@
 > 本插件旨在为 DeepSeek Harness 打造精致沉浸的 Codex 双列活动栏与顶栏一体化视觉体验。功能演变与日常维护主要依据作者个人实际工作流展开，欢迎交流体验与提交 PR！
 
 ## ✨ 核心特性
+
+- 📥 **会话导入扩展插槽与新会话行自适应布局 (DSH 0.2.2-rc.3 sidebar.session.action & deepseek-chat-import)**  
+  全面深度适配 DSH 0.2.2-rc.3 全新引入的会话动作高阶插槽（`sidebar.session.action`）与新会话行容器（`newSessionRow`）。完美支持官方最新 `@deepseek-ai/dsh-deepseek-chat-import` 导入生态，为上传/导入触发器按钮（`IconUploadOutlineMedium` / `IconUploadOutlineRegular` / `[class*="_trigger"]`）赋予纯正 Codex 34px 微质感、暗黑微光磨砂边框与悬浮高亮动效；同时针对新会话按钮进行自适应 flex-grow 流式排布，在侧栏展开与折叠时平滑过渡。
+
+- 🎨 **官方上传与导入矢量图腾体系 (DSH 0.2.2-rc.3 upload-outline)**  
+  深度对齐官方最新 `upload-outline` 矢量规范与图标集，无缝统一 Codex 活动栏工具箱、侧边面板动作与导入对话框的视觉风格。
 
 - 🎨 **全窗顶栏一体化质感**  
   无缝打通原生标题栏与 48px 活动栏（Activity Rail），彻底消除断层与多余留白，与原生明亮/暗黑主题深度贴合。
@@ -102,7 +108,7 @@ mklink /J "%USERPROFILE%\.dsh\packages\dsh-codex-rail" "你的本地仓库路径
 ```
 
 ## ⚙️ 兼容性说明
-- **兼容 DSH 版本**：`>= 0.1.1-rc.1`（完美支持 DSH 0.2.0 / 0.2.1-rc.1 ~ rc.5 / 0.2.2-alpha.2 ~ alpha.3 / 0.2.2-rc.1 ~ rc.2 Desktop 与 Web）
+- **兼容 DSH 版本**：`>= 0.1.1-rc.1`（全面测试并完美兼容 DSH 0.2.0 / 0.2.1-rc.1 ~ rc.5 / 0.2.2-alpha.2 ~ alpha.3 / 0.2.2-rc.1 ~ rc.3 Desktop 与 Web）
 - **适用平台**：Windows / macOS / Linux
 
 ## 📄 开源许可
