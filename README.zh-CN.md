@@ -2,7 +2,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/DSH-Plugin-blue?style=flat-square" alt="DSH Plugin" />
-  <img src="https://img.shields.io/badge/Version-1.3.13-green?style=flat-square" alt="Version 1.3.13" />
+  <img src="https://img.shields.io/badge/Version-1.3.14-green?style=flat-square" alt="Version 1.3.14" />
   <img src="https://img.shields.io/badge/License-MIT-purple?style=flat-square" alt="License MIT" />
   <img src="https://img.shields.io/badge/Vibe%20Coding-%E2%9C%A8-orange?style=flat-square" alt="Vibe Coding" />
 </p>
@@ -21,8 +21,17 @@
 
 ## ✨ 核心特性
 
-- 📥 **会话导入扩展插槽与新会话行自适应布局 (DSH 0.2.2-rc.3 sidebar.session.action & deepseek-chat-import)**  
-  全面深度适配 DSH 0.2.2-rc.3 全新引入的会话动作高阶插槽（`sidebar.session.action`）与新会话行容器（`newSessionRow`）。完美支持官方最新 `@deepseek-ai/dsh-deepseek-chat-import` 导入生态，为上传/导入触发器按钮（`IconUploadOutlineMedium` / `IconUploadOutlineRegular` / `[class*="_trigger"]`）赋予纯正 Codex 34px 微质感、暗黑微光磨砂边框与悬浮高亮动效；同时针对新会话按钮进行自适应 flex-grow 流式排布，在侧栏展开与折叠时平滑过渡。
+- 🔄 **DSH 0.2.2-rc.4 全面适配与运行时 CSS 前缀自检**  
+  已完成对上游 **DSH 0.2.2-rc.4**（`@deepseek-ai/dsh@0.2.2-rc.4`）及桌面端构建的全面验证与适配。支持在运行时自动探测 CSS Module 哈希前缀（`_regionArea` / `_sidebarCol`，兼容 `wtg9ga_`/`mP3x-q_` 与 `hHd-Xa_`/`pI_x6G_` 等多端构建），并精确隔离 `sidebar.session.action` 中的新建会话触发器与 `@deepseek-ai/dsh-deepseek-chat-import` 导入按钮。
+
+- 🎨 **原生 DSH Design Token 融合与原生拖拽调宽**  
+  深度接入 DSH 原生 `--dsw-*` 设计令牌（`--dsw-specific-sidebar-fill`、`--dsw-alias-border-l3`、`--dsw-radius-md` 等），完整保留 `AppFrame` 原生网格与拖动手柄，实现 100% 原生手感的侧边栏左右自由拉伸。
+
+- 🧩 **深度兼容 `dsh-claude-style` 视觉与缩放交互**  
+  全面适配 `dsh-claude-style` 插件：同步左侧活动栏画布底色与透明度（`--dsh-claude-sidebar-canvas`、`--dsh-claude-background-opacity`），支持底部账户接管（`footer-takeover`）及更新提示点收敛、页面缩放（`--dsh-claude-page-zoom-factor`）下的浮动气泡精准定位补偿，以及高频浮层与光标 DOM 过滤。
+
+- 📥 **会话导入扩展插槽与新会话行兼容 (DSH 0.2.2-rc.3 ~ rc.4)**  
+  全面适配 DSH 会话动作高阶插槽（`sidebar.session.action`）、`newSessionRow` 与 `topStrip` 结构，并与官方 `@deepseek-ai/dsh-deepseek-chat-import` 插件和谐共存。
 
 - 🎨 **官方上传与导入矢量图腾体系 (DSH 0.2.2-rc.3 upload-outline)**  
   深度对齐官方最新 `upload-outline` 矢量规范与图标集，无缝统一 Codex 活动栏工具箱、侧边面板动作与导入对话框的视觉风格。
@@ -108,7 +117,7 @@ mklink /J "%USERPROFILE%\.dsh\packages\dsh-codex-rail" "你的本地仓库路径
 ```
 
 ## ⚙️ 兼容性说明
-- **兼容 DSH 版本**：`>= 0.1.1-rc.1`（全面测试并完美兼容 DSH 0.2.0 / 0.2.1-rc.1 ~ rc.5 / 0.2.2-alpha.2 ~ alpha.3 / 0.2.2-rc.1 ~ rc.3 Desktop 与 Web）
+- **兼容 DSH 版本**：`>= 0.1.1-rc.1`（全面测试并完美兼容 DSH 0.2.0 / 0.2.1-rc.1 ~ rc.5 / 0.2.2-alpha.2 ~ alpha.3 / 0.2.2-rc.1 ~ rc.4 Desktop 与 Web）
 - **适用平台**：Windows / macOS / Linux
 
 ## 📄 开源许可
