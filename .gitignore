@@ -8,3 +8,4 @@ Thumbs.db
 dist/
 *.tmp
 .tmp*
+AGENT_HANDOFF.md

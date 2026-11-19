@@ -2,7 +2,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/DSH-Plugin-blue?style=flat-square" alt="DSH Plugin" />
-  <img src="https://img.shields.io/badge/Version-1.3.14-green?style=flat-square" alt="Version 1.3.14" />
+  <img src="https://img.shields.io/badge/Version-1.3.15-green?style=flat-square" alt="Version 1.3.15" />
   <img src="https://img.shields.io/badge/License-MIT-purple?style=flat-square" alt="License MIT" />
   <img src="https://img.shields.io/badge/Vibe%20Coding-%E2%9C%A8-orange?style=flat-square" alt="Vibe Coding" />
 </p>
@@ -21,8 +21,8 @@
 
 ## ✨ 核心特性
 
-- 🔄 **DSH 0.2.2-rc.4 全面适配与运行时 CSS 前缀自检**  
-  已完成对上游 **DSH 0.2.2-rc.4**（`@deepseek-ai/dsh@0.2.2-rc.4`）及桌面端构建的全面验证与适配。支持在运行时自动探测 CSS Module 哈希前缀（`_regionArea` / `_sidebarCol`，兼容 `wtg9ga_`/`mP3x-q_` 与 `hHd-Xa_`/`pI_x6G_` 等多端构建），并精确隔离 `sidebar.session.action` 中的新建会话触发器与 `@deepseek-ai/dsh-deepseek-chat-import` 导入按钮。
+- 🔄 **DSH 0.2.2-rc.5 全面适配与运行时 CSS 前缀自检**  
+  已完成对上游 **DSH 0.2.2-rc.5**（`@deepseek-ai/dsh@0.2.2-rc.5`）及桌面端构建的全面验证与适配。支持在运行时自动探测 CSS Module 哈希前缀（`_regionArea` / `_sidebarCol`，兼容 `wtg9ga_`/`mP3x-q_` 与 `hHd-Xa_`/`pI_x6G_` 等多端构建），并精确隔离 `sidebar.session.action` 中的新建会话触发器与 `@deepseek-ai/dsh-deepseek-chat-import` 导入按钮。
 
 - 🎨 **原生 DSH Design Token 融合与原生拖拽调宽**  
   深度接入 DSH 原生 `--dsw-*` 设计令牌（`--dsw-specific-sidebar-fill`、`--dsw-alias-border-l3`、`--dsw-radius-md` 等），完整保留 `AppFrame` 原生网格与拖动手柄，实现 100% 原生手感的侧边栏左右自由拉伸。
@@ -117,7 +117,7 @@ mklink /J "%USERPROFILE%\.dsh\packages\dsh-codex-rail" "你的本地仓库路径
 ```
 
 ## ⚙️ 兼容性说明
-- **兼容 DSH 版本**：`>= 0.1.1-rc.1`（全面测试并完美兼容 DSH 0.2.0 / 0.2.1-rc.1 ~ rc.5 / 0.2.2-alpha.2 ~ alpha.3 / 0.2.2-rc.1 ~ rc.4 Desktop 与 Web）
+- **兼容 DSH 版本**：`>= 0.1.1-rc.1`（全面测试并完美兼容 DSH 0.2.0 / 0.2.1-rc.1 ~ rc.5 / 0.2.2-alpha.2 ~ alpha.3 / 0.2.2-rc.1 ~ rc.5 Desktop 与 Web）
 - **适用平台**：Windows / macOS / Linux
 
 ## 📄 开源许可
