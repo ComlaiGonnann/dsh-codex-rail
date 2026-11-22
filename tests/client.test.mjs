@@ -480,8 +480,10 @@ class MockElement extends MockNode {
       target: ev.target || this,
       relatedTarget: ev.relatedTarget ?? null,
       pointerType: ev.pointerType ?? "mouse",
+      pointerId: ev.pointerId ?? 1,
       clientX: ev.clientX ?? 0,
       clientY: ev.clientY ?? 0,
+      button: ev.button ?? 0,
       buttons: ev.buttons ?? 0,
       key: ev.key ?? "",
       altKey: Boolean(ev.altKey),
@@ -492,8 +494,10 @@ class MockElement extends MockNode {
       repeat: Boolean(ev.repeat),
       defaultPrevented: false,
       _stopped: false,
+      _immediateStopped: false,
       preventDefault() { this.defaultPrevented = true; },
-      stopPropagation() { this._stopped = true; }
+      stopPropagation() { this._stopped = true; },
+      stopImmediatePropagation() { this._stopped = true; this._immediateStopped = true; }
     };
     const pathNodes = [];
     let cur = this;
@@ -510,6 +514,7 @@ class MockElement extends MockNode {
       if (event._stopped) break;
       const list = [...(node._listeners || [])];
       for (const l of list) {
+        if (event._immediateStopped) break;
         if (l.type === event.type && l.capture) {
           l.fn.call(node, event);
         }
@@ -521,6 +526,7 @@ class MockElement extends MockNode {
       if (event._stopped) break;
       const list = [...(node._listeners || [])];
       for (const l of list) {
+        if (event._immediateStopped) break;
         if (l.type === event.type && !l.capture) {
           l.fn.call(node, event);
         }
@@ -754,6 +760,7 @@ function createTestEnv(options = {}) {
   const sessionListeners = new Set();
   const openedSessions = [];
   let toggleCount = 0;
+  let lastSetSidebarWidth = null;
 
   const layout = {
     panelInfo: {
@@ -766,6 +773,10 @@ function createTestEnv(options = {}) {
     selectPanel(id) {
       activePanelId = id;
       panelListeners.forEach((fn) => fn({ activePanelId }));
+    },
+    setSidebar(px) {
+      lastSetSidebarWidth = px;
+      sidebarRoot.style.width = `${px}px`;
     },
     toggleSidebar() {
       toggleCount++;
@@ -870,6 +881,7 @@ function createTestEnv(options = {}) {
     win, doc, root, frame, sidebarCol, centerCol, sidebarRoot, panelList, regionArea, footArea, settingsArea,
     layout, uiWorkspace, ctx, openedSessions,
     getToggleCount: () => toggleCount,
+    getLastSidebarWidth: () => lastSetSidebarWidth,
     setSession: (sid) => { currentSessionId = sid; sessionListeners.forEach((fn) => fn({ sessionId: sid })); },
     createPanelRow, createMoreMenu, applyPlugin, advanceTime,
     flushMicrotasks: () => new Promise((r) => setTimeout(r, 0)),
@@ -1241,7 +1253,7 @@ test("P2-9: macOS (darwin) 交通灯避让、快捷键格式与全屏态 CSS 规
   assert.ok(styleText.includes('html[data-platform="darwin"]:not([data-fullscreen]) #dsh-codex-sidebar-rail'), "应包含 macOS 交通灯避让规则");
   assert.ok(styleText.includes("padding-top: var(--dsh-frame-top-clearance, 48px)"), "应使用 48px 顶部避让");
   assert.ok(styleText.includes('html[data-platform="darwin"][data-fullscreen] #dsh-codex-sidebar-rail'), "应包含 macOS 全屏紧凑间距规则");
-  assert.ok(styleText.includes('html[data-windows-titlebar] #root:not(:has([data-sidebar-drawer])) .wtg9ga_toggle'), "Windows 全屏下也必须隐藏原生 toggle 防碰撞");
+  assert.ok(styleText.includes('html[data-windows-titlebar]:not([data-codex-drawer]) #root .wtg9ga_toggle'), "Windows 全屏下也必须隐藏原生 toggle 防碰撞");
 
   const railToggle = env.doc.getElementById("dsh-codex-btn-rail-toggle");
   assert.equal(railToggle.getAttribute("data-tooltip-shortcut"), "⌘ B", "macOS 快捷键应显示 ⌘ B");
@@ -1338,6 +1350,413 @@ test("进阶体验：活动栏键盘上下导航、Hover Peek 选会话自动收
   assert.equal(env.frame.hasAttribute("data-codex-sidebar-peek"), false);
   assert.equal(env.frame.hasAttribute("data-sidebar-collapsed"), true, "Peek 期间卸载插件必须还原宿主折叠状态");
   assert.equal(env.stats().timeouts, 0);
+  assert.equal(env.stats().winListeners, 0);
+  assert.equal(env.stats().docListeners, 0);
+});
+
+test("回归防线：任务看板与技能中心主面板/右侧栏 [data-dsh-plugin] 绝不被隐藏或误克隆，且支持 data-dsh-panel-entry 零延迟高亮", async () => {
+  const env = createTestEnv();
+
+  // 1) 在 panelList 中挂载不带 data-panel-id、仅靠 <svg data-dsh-panel-entry> 标识的原生行（还原 DSH 0.2.2 + @linxin666 真实 DOM）
+  const createRealPanelEntry = (panelId, label) => {
+    const entry = env.doc.createElement("div");
+    entry.className = "wtg9ga_panelEntry";
+    const btn = env.doc.createElement("button");
+    btn.className = "wtg9ga_panelRow";
+    btn.setAttribute("aria-label", label);
+    btn.innerHTML = `<span class="wtg9ga_panelGlyph"><svg data-dsh-panel-entry="${panelId}" viewBox="0 0 16 16"><rect x="2" y="2" width="12" height="12"/></svg></span><span class="wtg9ga_panelTitle">${label}</span>`;
+    entry.appendChild(btn);
+    env.panelList.appendChild(entry);
+    return { entry, btn };
+  };
+
+  createRealPanelEntry("task-board", "任务看板");
+  createRealPanelEntry("skill-explorer", "技能中心");
+
+  // 2) 在 centerCol 中挂载两层嵌套的主页面 [data-dsh-plugin] 容器，并在 rightbarCol 挂载右侧栏容器
+  const mainPanel = env.doc.createElement("div");
+  mainPanel.className = "mP3x-q_mainPanel";
+  mainPanel.setAttribute("data-global-panel", "true");
+  env.centerCol.appendChild(mainPanel);
+
+  const tbView = env.doc.createElement("div");
+  tbView.setAttribute("data-dsh-taskboard-view", "");
+  tbView.setAttribute("data-dsh-plugin", "task-board");
+  const tbBoard = env.doc.createElement("div");
+  tbBoard.setAttribute("data-dsh-taskboard-board", "");
+  tbBoard.setAttribute("data-dsh-plugin", "task-board");
+  tbBoard.innerHTML = '<header><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="4"/></svg><span>任务看板全量正文内容不应出现在 Tooltip</span></header>';
+  // 模拟曾被旧版误标残留的隐藏类，验证 syncAll() 能自愈清理
+  tbView.classList.add("dsh-codex-hide-source");
+  tbView.appendChild(tbBoard);
+  mainPanel.appendChild(tbView);
+
+  const seView = env.doc.createElement("div");
+  seView.setAttribute("data-dsh-skill-explorer-view", "");
+  seView.setAttribute("data-dsh-plugin", "skill-explorer");
+  const sePanel = env.doc.createElement("div");
+  sePanel.setAttribute("data-dsh-plugin", "skill-explorer");
+  sePanel.innerHTML = '<div><svg viewBox="0 0 16 16"><path d="M2 2h12"/></svg><h2>技能中心列表正文</h2></div>';
+  seView.appendChild(sePanel);
+  mainPanel.appendChild(seView);
+
+  const rightbarCol = env.doc.createElement("div");
+  rightbarCol.className = "mP3x-q_rightbarCol";
+  rightbarCol.setAttribute("data-rightbar-col", "");
+  const gitGraphPanel = env.doc.createElement("div");
+  gitGraphPanel.setAttribute("data-dsh-plugin", "git-graph");
+  gitGraphPanel.innerHTML = '<svg viewBox="0 0 16 16"><circle cx="4" cy="4" r="2"/></svg><span>Git Graph</span>';
+  rightbarCol.appendChild(gitGraphPanel);
+  env.frame.appendChild(rightbarCol);
+
+  // 3) 侧栏内非交互装饰容器不应被采集
+  const decorativeWrap = env.doc.createElement("div");
+  decorativeWrap.setAttribute("data-dsh-plugin", "wrapper");
+  decorativeWrap.innerHTML = "<span>装饰容器</span>";
+  env.sidebarRoot.appendChild(decorativeWrap);
+
+  const cleanup = env.applyPlugin();
+
+  const toolsBox = env.doc.getElementById("dsh-codex-sidebar-tools");
+  const keys = Array.from(toolsBox.children).map((b) => b.getAttribute("data-key"));
+  assert.deepEqual(keys, ["task-board", "skill-explorer"], "活动栏仅应有任务看板与技能中心 2 个按钮，绝不出现幽灵按钮");
+
+  // 主面板与右侧栏绝不被隐藏（且预先残留的隐藏类必须已被自愈清除）
+  for (const el of [tbView, tbBoard, seView, sePanel, gitGraphPanel, decorativeWrap]) {
+    assert.equal(el.classList.contains("dsh-codex-hide-source"), false, "非侧栏或非交互节点绝不能被添加 dsh-codex-hide-source");
+  }
+
+  // 4) 通过 layout.selectPanel 切换面板时支持 data-dsh-panel-entry 瞬时高亮
+  const homeBtn = env.doc.getElementById("dsh-codex-btn-home");
+  const tbBtn = toolsBox.children[0];
+  const seBtn = toolsBox.children[1];
+
+  env.layout.selectPanel("task-board");
+  assert.equal(tbBtn.classList.contains("active"), true, "打开任务看板应瞬时高亮任务看板按钮");
+  assert.equal(seBtn.classList.contains("active"), false);
+  assert.equal(homeBtn.classList.contains("active"), false);
+
+  env.layout.selectPanel("skill-explorer");
+  assert.equal(tbBtn.classList.contains("active"), false);
+  assert.equal(seBtn.classList.contains("active"), true, "打开技能中心应瞬时高亮技能中心按钮");
+  assert.equal(homeBtn.classList.contains("active"), false);
+
+  env.layout.selectPanel(null);
+  assert.equal(tbBtn.classList.contains("active"), false);
+  assert.equal(seBtn.classList.contains("active"), false);
+  assert.equal(homeBtn.classList.contains("active"), true, "返回对话后应瞬时恢复主页按钮高亮");
+
+  // 5) 侧栏内的合法第三方交互插件按钮（如 dsh-agy-automation）仍可正常采集进入活动栏
+  const agyBtn = env.doc.createElement("button");
+  agyBtn.type = "button";
+  agyBtn.setAttribute("data-dsh-agy-automation-entry", "");
+  agyBtn.setAttribute("data-dsh-plugin", "dsh-agy-automation");
+  agyBtn.textContent = "AGY 自动化";
+  env.sidebarRoot.appendChild(agyBtn);
+
+  await env.flushMicrotasks();
+  env.advanceTime(120);
+
+  const keysAfterAgy = Array.from(toolsBox.children).map((b) => b.getAttribute("data-key"));
+  assert.deepEqual(keysAfterAgy, ["task-board", "skill-explorer", "dsh-agy-automation"], "合法第三方插件按钮应正常进入活动栏");
+  assert.equal(agyBtn.classList.contains("dsh-codex-hide-source"), true);
+
+  // 6) 卸载清理零残留
+  cleanup();
+  assert.equal(env.doc.querySelectorAll(".dsh-codex-hide-source").length, 0);
+  assert.equal(env.stats().timeouts, 0);
+  assert.equal(env.stats().intervals, 0);
+  assert.equal(env.stats().mutationObservers, 0);
+  assert.equal(env.stats().resizeObservers, 0);
+  assert.equal(env.stats().winListeners, 0);
+  assert.equal(env.stats().docListeners, 0);
+  assert.equal(env.stats().panelListeners, 0);
+  assert.equal(env.stats().sessionListeners, 0);
+});
+
+test("性能优化：零根级 :has()、零通配符拖拽 CSS、GPU 幽灵分割线拦截逐帧重排、Esc 取消与双击还原宽度", async () => {
+  const env = createTestEnv();
+  env.createPanelRow("plugins", "插件");
+
+  const handle = env.doc.createElement("div");
+  handle.className = "mP3x-q_handle";
+  handle.setAttribute("data-side", "sidebar");
+  handle._rect = { left: 308, top: 40, right: 316, bottom: 800, width: 8, height: 760 };
+  env.frame.appendChild(handle);
+
+  const rightHandle = env.doc.createElement("div");
+  rightHandle.className = "mP3x-q_handle";
+  rightHandle.setAttribute("data-side", "rightbar");
+  rightHandle._rect = { left: 826, top: 40, right: 834, bottom: 800, width: 8, height: 760 };
+  env.frame.appendChild(rightHandle);
+
+  const rightbarCol = env.doc.createElement("div");
+  rightbarCol.className = "mP3x-q_rightbarCol";
+  rightbarCol._rect = { left: 830, top: 40, right: 1280, bottom: 800, width: 450, height: 760 };
+  env.frame.appendChild(rightbarCol);
+
+  // 模拟宿主 React DragHandle 监听器，统计 pointerdown / pointermove / pointerup / pointercancel 触达次数
+  const hostStats = { down: 0, move: 0, up: 0, cancel: 0, lastUpX: null };
+  handle.addEventListener("pointerdown", () => { hostStats.down++; });
+  handle.addEventListener("pointermove", () => { hostStats.move++; });
+  handle.addEventListener("pointerup", (e) => { hostStats.up++; hostStats.lastUpX = e.clientX; });
+  handle.addEventListener("pointercancel", () => { hostStats.cancel++; });
+
+  const cleanup = env.applyPlugin();
+  const styleText = env.doc.getElementById("dsh-codex-sidebar-style").textContent;
+  const html = env.doc.documentElement;
+
+  // 1) 零根级 :has() 与零通配符 * 拖拽样式验证
+  const hasLines = styleText.split("\n").filter((line) => line.includes(":has("));
+  assert.equal(hasLines.length, 2, "全样式表仅允许保留 #dsh-codex-settings-slot 内部 2 条局部 :has()");
+  assert.equal(hasLines.every((line) => line.includes("#dsh-codex-settings-slot")), true);
+  assert.equal(/(?:html|body|#root|footArea)[^\s{,]*:(?:not\()?:has\(/.test(styleText), false, "根级或 footer 选择器不得再使用 :has()");
+  assert.equal(/data-codex-dragging[^\n{]*\*/.test(styleText), false, "拖拽 CSS 不得包含 * 通配符避免起止帧万级 DOM 重算");
+  assert.ok(styleText.includes("contain: layout style"), "应启用 contain 隔离主列重排");
+  assert.ok(styleText.includes("#dsh-codex-drag-sash"), "应注入 GPU 幽灵分割线样式");
+  assert.ok(styleText.includes("will-change: transform"), "幽灵分割线应开启 GPU 合成层");
+
+  // 2) 惰性 pointermove：非 Peek 且非拖拽状态下不得常驻 document / window pointermove 监听
+  const hasPointerMoveDoc = () => env.doc._listeners.some((l) => l.type === "pointermove");
+  const hasPointerMoveWin = () => env.win._listeners.some((l) => l.type === "pointermove");
+  assert.equal(hasPointerMoveDoc(), false, "非 Peek 状态不得常驻 document pointermove");
+  assert.equal(hasPointerMoveWin(), false, "非拖拽状态不得常驻 window pointermove");
+
+  // 3) 按下侧栏手柄：放行 pointerdown 到宿主，同步进入拖拽态并隐藏 Tooltip
+  const toolsBox = env.doc.getElementById("dsh-codex-sidebar-tools");
+  const pluginBtn = toolsBox.children[0];
+  pluginBtn.__hover = true;
+  pluginBtn.dispatchEvent({ type: "pointerover", bubbles: true, pointerType: "mouse" });
+  env.advanceTime(460);
+  const tip = env.doc.getElementById("dsh-codex-floating-tooltip");
+  assert.equal(tip.classList.contains("visible"), true);
+
+  handle.dispatchEvent({ type: "pointerdown", button: 0, pointerId: 1, clientX: 312, clientY: 200, bubbles: true });
+  assert.equal(hostStats.down, 1, "pointerdown 必须完整放行给宿主 DragHandle");
+  assert.equal(html.getAttribute("data-codex-dragging"), "col", "按下横向手柄应立即进入 col 极速拖拽态");
+  assert.equal(tip.classList.contains("visible"), false, "拖拽开始应立即收起气泡");
+  assert.equal(hasPointerMoveWin(), true, "拖拽期间临时挂载 window 捕获 pointermove");
+
+  // 4) 拖拽移动期间：拦截全部 pointermove 避免宿主逐帧重排，改由纯 translate3d 幽灵分割线预览
+  handle.dispatchEvent({ type: "pointermove", pointerId: 1, clientX: 328, clientY: 220, bubbles: true });
+  env.advanceTime(20);
+  const sash = env.doc.getElementById("dsh-codex-drag-sash");
+  const pill = env.doc.getElementById("dsh-codex-drag-sash-pill");
+  assert.equal(hostStats.move, 0, "拖拽中 pointermove 必须被拦截，宿主零逐帧重排");
+  assert.equal(sash.classList.contains("visible"), true, "幽灵分割线应显现");
+  assert.equal(sash.style.transform, "translate3d(328px, 0, 0)");
+  assert.equal(pill.textContent, "280 px · 默认", "精确到达 280px 默认宽时应显示默认提示");
+  assert.equal(pill.getAttribute("data-at-default"), "1");
+
+  // 超出最大宽度 420px 时幽灵分割线钳位在 420px
+  handle.dispatchEvent({ type: "pointermove", pointerId: 1, clientX: 600, clientY: 260, bubbles: true });
+  env.advanceTime(20);
+  assert.equal(hostStats.move, 0);
+  assert.equal(sash.style.transform, "translate3d(468px, 0, 0)");
+  assert.equal(pill.textContent, "420 px");
+  assert.equal(pill.hasAttribute("data-at-default"), false);
+
+  // 拖拽期间新增工作区插件按钮，syncAll 应被延迟而不打断拖拽帧
+  const lateEntry = env.doc.createElement("button");
+  lateEntry.type = "button";
+  lateEntry.setAttribute("data-dsh-plugin", "late-plugin");
+  lateEntry.textContent = "延迟插件";
+  env.sidebarRoot.appendChild(lateEntry);
+
+  await env.flushMicrotasks();
+  env.advanceTime(200);
+  assert.equal(toolsBox.querySelector('[data-key="late-plugin"]'), null, "拖拽期间应冻结 syncAll 避免主线程卡顿");
+
+  // 5) 松开鼠标：放行 pointerup 直达宿主一次性提交最终宽度，清理幽灵分割线并卸载临时监听
+  handle.dispatchEvent({ type: "pointerup", button: 0, pointerId: 1, clientX: 360, clientY: 260, bubbles: true });
+  assert.equal(hostStats.up, 1, "pointerup 必须放行给宿主一次性提交最终宽度");
+  assert.equal(hostStats.lastUpX, 360);
+  assert.equal(sash.classList.contains("visible"), false, "松开鼠标后幽灵分割线应隐藏");
+  assert.equal(hasPointerMoveWin(), false, "松开鼠标后立即卸载 window pointermove");
+  assert.equal(html.hasAttribute("data-codex-dragging"), false, "松开鼠标应立即退出拖拽态");
+  env.advanceTime(120);
+  assert.ok(toolsBox.querySelector('[data-key="late-plugin"]'), "拖拽结束后应自动补刷挂起的活动栏同步");
+
+  // 6) 右侧栏手柄向左拖拽（clientX 减小，宽度反向增大）与 Esc 取消拦截防提交
+  rightHandle.dispatchEvent({ type: "pointerdown", button: 0, pointerId: 2, clientX: 830, clientY: 240, bubbles: true });
+  rightHandle.dispatchEvent({ type: "pointermove", pointerId: 2, clientX: 730, clientY: 240, bubbles: true });
+  env.advanceTime(20);
+  assert.equal(sash.getAttribute("data-side"), "rightbar");
+  assert.equal(sash.style.transform, "translate3d(730px, 0, 0)");
+  assert.equal(pill.textContent, "550 px", "右侧栏左移 100px 应实时预览 550 px");
+
+  let cancelHit = 0;
+  let upAfterCancelHit = 0;
+  rightHandle.addEventListener("pointercancel", () => { cancelHit++; });
+  rightHandle.addEventListener("pointerup", () => { upAfterCancelHit++; });
+  rightHandle.dispatchEvent({ type: "keydown", key: "Escape", bubbles: true });
+  assert.equal(cancelHit, 1, "按 Escape 应向手柄派发 pointercancel 通知宿主中止拖拽");
+  assert.equal(sash.classList.contains("visible"), false);
+  assert.equal(html.hasAttribute("data-codex-dragging"), false);
+  rightHandle.dispatchEvent({ type: "pointerup", button: 0, pointerId: 2, clientX: 730, bubbles: true });
+  assert.equal(upAfterCancelHit, 0, "Esc 取消后紧随松手的 pointerup 应被拦截以防止误改宽度");
+
+  // 7) 宿主动效驱动的 data-dragging 属性变化也应联动进入/退出极速拖拽态
+  env.frame.setAttribute("data-dragging", "true");
+  await env.flushMicrotasks();
+  assert.equal(html.getAttribute("data-codex-dragging"), "col");
+  env.frame.removeAttribute("data-dragging");
+  await env.flushMicrotasks();
+  assert.equal(html.hasAttribute("data-codex-dragging"), false);
+
+  // 8) 双击侧栏手柄还原默认宽度 280px
+  handle.dispatchEvent({ type: "dblclick", bubbles: true });
+  assert.equal(env.getLastSidebarWidth(), 280, "双击侧栏拖拽手柄应还原默认宽度 280px");
+
+  // 9) 卸载清理零残留（包括幽灵分割线 DOM 与 html 上的 data-codex-* 属性）
+  cleanup();
+  assert.equal(env.doc.getElementById("dsh-codex-drag-sash"), null, "卸载后应彻底移除幽灵分割线节点");
+  for (const attr of ["data-codex-drawer", "data-codex-collapsed", "data-codex-wallpaper", "data-codex-dragging"]) {
+    assert.equal(html.hasAttribute(attr), false, `卸载后 html 不得残留 ${attr}`);
+  }
+  assert.equal(env.stats().timeouts, 0);
+  assert.equal(env.stats().intervals, 0);
+  assert.equal(env.stats().mutationObservers, 0);
+  assert.equal(env.stats().resizeObservers, 0);
+  assert.equal(env.stats().winListeners, 0);
+  assert.equal(env.stats().docListeners, 0);
+});
+
+test("桌面端润色：折叠态后台运行会话呼吸点、历史导航目标标题与鼠标侧键、再次点击已激活面板返回对话", async () => {
+  const env = createTestEnv();
+
+  // 挂载不带 data-panel-id、靠 <svg data-dsh-panel-entry> 标识的面板按钮
+  const entry = env.doc.createElement("div");
+  entry.className = "wtg9ga_panelEntry";
+  const panelBtn = env.doc.createElement("button");
+  panelBtn.className = "wtg9ga_panelRow";
+  panelBtn.setAttribute("aria-label", "任务看板");
+  panelBtn.innerHTML = `<span class="wtg9ga_panelGlyph"><svg data-dsh-panel-entry="task-board" viewBox="0 0 16 16"><rect x="2" y="2" width="12" height="12"/></svg></span><span class="wtg9ga_panelTitle">任务看板</span>`;
+  entry.appendChild(panelBtn);
+  env.panelList.appendChild(entry);
+
+  // 挂载带标题与运行状态的会话行
+  const row1 = env.doc.createElement("div");
+  row1.setAttribute("data-row-key", "session:s-1");
+  row1.innerHTML = '<span class="rowTitle">修复拖拽卡顿问题</span>';
+  env.regionArea.appendChild(row1);
+
+  const row2 = env.doc.createElement("div");
+  row2.setAttribute("data-row-key", "session:s-2");
+  row2.innerHTML = '<span class="rowTitle">重构侧边栏微交互细节</span><span data-state="ongoing"></span>';
+  env.regionArea.appendChild(row2);
+
+  env.setSession("s-1");
+  const cleanup = env.applyPlugin();
+
+  const homeBtn = env.doc.getElementById("dsh-codex-btn-home");
+  const toolsBox = env.doc.getElementById("dsh-codex-sidebar-tools");
+  const tbBtn = toolsBox.querySelector('[data-key="task-board"]');
+  const backBtn = env.doc.getElementById("dsh-codex-btn-back");
+  const fwdBtn = env.doc.getElementById("dsh-codex-btn-forward");
+
+  // 1) 折叠后主页按钮显示后台运行会话数量与提示
+  assert.equal(homeBtn.getAttribute("data-codex-running-count"), "1");
+  env.frame.setAttribute("data-sidebar-collapsed", "true");
+  env.sidebarRoot.classList.add("wtg9ga_collapsed");
+  await env.flushMicrotasks();
+  env.advanceTime(120);
+  assert.equal(env.doc.documentElement.getAttribute("data-codex-collapsed"), "1");
+  assert.equal(homeBtn.getAttribute("data-tooltip"), "主页与工作区 · 1 个会话运行中");
+
+  // 2) 会话切换后，后退/前进 Tooltip 展示目标会话标题，并支持鼠标侧键 (button=3/4)
+  env.setSession("s-2");
+  assert.equal(backBtn.getAttribute("data-tooltip"), "后退 · 修复拖拽卡顿问题");
+  env.win.dispatchEvent({ type: "mouseup", button: 3, preventDefault() {} });
+  env.advanceTime(250);
+  assert.equal(env.uiWorkspace.selection.getSnapshot().sessionId, "s-1", "鼠标侧键后退应回到 s-1");
+  assert.equal(fwdBtn.getAttribute("data-tooltip"), "前进 · 重构侧边栏微交互细节");
+  env.win.dispatchEvent({ type: "mouseup", button: 4, preventDefault() {} });
+  env.advanceTime(250);
+  assert.equal(env.uiWorkspace.selection.getSnapshot().sessionId, "s-2", "鼠标侧键前进应回到 s-2");
+
+  // 3) 再次点击已激活面板图标直接返回当前对话
+  env.layout.selectPanel("task-board");
+  assert.equal(backBtn.getAttribute("data-tooltip"), "后退 · 返回对话");
+  assert.equal(tbBtn.classList.contains("active"), true);
+  tbBtn.click();
+  assert.equal(env.layout.panelInfo.getSnapshot().activePanelId, null, "再次点击已激活面板应返回对话");
+  assert.equal(tbBtn.classList.contains("active"), false);
+
+  cleanup();
+  assert.equal(env.stats().winListeners, 0);
+  assert.equal(env.stats().docListeners, 0);
+});
+
+test("DSH 0.2.3-alpha 兼容：新 CSS Module 前缀、panelTrailing 角标提取（过滤 visuallyHidden）及 settings.notice 隔离", async () => {
+  const env = createTestEnv({ sbPrefix: "hHd-Xa", afPrefix: "pI_x6G" });
+
+  // 1) 构造 0.2.3-alpha 代码审阅面板行，含 sidebar.panel.trailing (navCount + visuallyHidden)
+  const reviewEntry = env.doc.createElement("div");
+  reviewEntry.className = "hHd-Xa_panelEntry";
+  const reviewBtn = env.doc.createElement("button");
+  reviewBtn.className = "hHd-Xa_panelRow";
+  reviewBtn.setAttribute("aria-label", "代码审阅");
+  reviewBtn.innerHTML =
+    `<span class="hHd-Xa_panelGlyph"><svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="5"/></svg></span>` +
+    `<span class="hHd-Xa_panelTitle">代码审阅</span>` +
+    `<span class="hHd-Xa_panelTrailing"><span class="uA1_navCount"><span aria-hidden="true">12</span><span class="uA1_visuallyHidden">12 个待你审阅的变更请求</span></span></span>`;
+  reviewEntry.appendChild(reviewBtn);
+  env.panelList.appendChild(reviewEntry);
+
+  // 2) 构造 0.2.3-alpha SettingsRoot (noticeRow + triggerRow + AccountNotices + AccountNotifications)
+  env.settingsArea.innerHTML = "";
+  const noticeRow = env.doc.createElement("div");
+  noticeRow.className = "VOzbGW_noticeRow";
+  const noticeBox = env.doc.createElement("div");
+  noticeBox.className = "VOzbGW_notice";
+  const noticesRoot = env.doc.createElement("div");
+  noticesRoot.className = "pEg49a_root";
+  const stack = env.doc.createElement("div");
+  stack.className = "JZqiVa_stack";
+  const card = env.doc.createElement("aside");
+  card.className = "JZqiVa_card";
+  const ctaBtn = env.doc.createElement("button");
+  ctaBtn.type = "button";
+  ctaBtn.className = "JZqiVa_action";
+  ctaBtn.textContent = "立即查看";
+  card.appendChild(ctaBtn);
+  stack.appendChild(card);
+  noticesRoot.appendChild(stack);
+  noticeBox.appendChild(noticesRoot);
+  noticeRow.appendChild(noticeBox);
+
+  const triggerRow = env.doc.createElement("div");
+  triggerRow.className = "VOzbGW_triggerRow";
+  const accRoot = env.doc.createElement("div");
+  accRoot.className = "yHnPSG_root";
+  const accAnchor = env.doc.createElement("span");
+  accAnchor.className = "yHnPSG_anchor";
+  const accTrigger = env.doc.createElement("button");
+  accTrigger.type = "button";
+  accTrigger.className = "yHnPSG_trigger";
+  accTrigger.innerHTML = '<span class="yHnPSG_avatar">A</span><span class="yHnPSG_label">账号</span>';
+  accAnchor.appendChild(accTrigger);
+  accRoot.appendChild(accAnchor);
+  triggerRow.appendChild(accRoot);
+
+  env.settingsArea.appendChild(noticeRow);
+  env.settingsArea.appendChild(triggerRow);
+
+  const cleanup = env.applyPlugin();
+  const styleText = env.doc.getElementById("dsh-codex-sidebar-style").textContent;
+  assert.ok(styleText.includes(".pI_x6G_frame"), "应正确探测含下划线的 AF 前缀 pI_x6G");
+  assert.ok(styleText.includes(".hHd-Xa_panelList"), "应正确探测含连字符的 SB 前缀 hHd-Xa");
+  assert.ok(styleText.includes("#dsh-codex-settings-slot [class*=\"_noticeRow\"] > [class*=\"_notice\"]"), "应包含新账号通知容器外展规则");
+  assert.equal(styleText.includes("#dsh-codex-settings-slot button {"), false, "不得用宽泛的 #dsh-codex-settings-slot button 压扁账号通知卡片内按钮");
+
+  const toolsBox = env.doc.getElementById("dsh-codex-sidebar-tools");
+  const railReviewBtn = toolsBox.querySelector('[data-key="item-代码审阅"]');
+  assert.ok(railReviewBtn, "应克隆代码审阅入口按钮");
+  assert.equal(railReviewBtn.getAttribute("data-tooltip"), "代码审阅 (12)", "应只提取可见计数并忽略 visuallyHidden 文案");
+  assert.equal(railReviewBtn.querySelector(".dsh-codex-badge")?.textContent, "12");
+
+  cleanup();
   assert.equal(env.stats().winListeners, 0);
   assert.equal(env.stats().docListeners, 0);
 });
