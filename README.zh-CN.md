@@ -2,7 +2,7 @@
 
 <p align="center">
   <img src="https://img.shields.io/badge/DSH-Plugin-blue?style=flat-square" alt="DSH Plugin" />
-  <img src="https://img.shields.io/badge/Version-1.3.16-green?style=flat-square" alt="Version 1.3.16" />
+  <img src="https://img.shields.io/badge/Version-1.3.17-green?style=flat-square" alt="Version 1.3.17" />
   <img src="https://img.shields.io/badge/License-MIT-purple?style=flat-square" alt="License MIT" />
   <img src="https://img.shields.io/badge/Vibe%20Coding-%E2%9C%A8-orange?style=flat-square" alt="Vibe Coding" />
 </p>
@@ -20,6 +20,9 @@
 > 本插件旨在为 DeepSeek Harness 打造精致沉浸的 Codex 双列活动栏与顶栏一体化视觉体验。功能演变与日常维护主要依据作者个人实际工作流展开，欢迎交流体验与提交 PR！
 
 ## ✨ 核心特性
+
+- ⚡ **Hover Peek 零跳动预览与 GPU 幽灵分割线拖拽进阶（`v1.3.17`）**  
+  折叠态悬停预览通过 `data-codex-peeking` 锁定活动栏坐标，彻底消除新会话入口显隐导致的 40px 上下跳动并避免误抢主页运行态提示；GPU `translate3d` 拖拽预览支持左拖 `< 148px` 自动收起（保留原宽）、右侧栏 `CENTER_MIN = 400` 边界钳位、双侧手柄双击重置默认宽度、`pageZoom` 缩放精确落盘、`contain: style` 防浮层裁剪及 `_regionArea` 流式输出零全量重扫描节流。
 
 - 🔄 **DSH 0.2.3-alpha 全面适配与运行时 CSS 前缀自检**  
   已完成对上游 **DSH 0.2.3-alpha**（`@deepseek-ai/dsh@0.2.3-alpha.2` / `dsh-v0.2.3-alpha.1`）与 **0.2.2-rc.5** 及桌面端构建的全面验证与适配。支持在运行时自动探测 CSS Module 哈希前缀（`_regionArea` / `_sidebarCol`，兼容 `hHd-Xa_`/`pI_x6G_` 与 `wtg9ga_`/`mP3x-q_`），精准提取 `sidebar.panel.trailing` 变更审阅计数角标并过滤 `visuallyHidden` 无障碍文案，同时隔离 `settings.notice` 账号通知卡片避免被 36px 槽位挤压。

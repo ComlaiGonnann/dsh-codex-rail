@@ -761,6 +761,7 @@ function createTestEnv(options = {}) {
   const openedSessions = [];
   let toggleCount = 0;
   let lastSetSidebarWidth = null;
+  let lastSetRightbarWidth = null;
 
   const layout = {
     panelInfo: {
@@ -777,6 +778,9 @@ function createTestEnv(options = {}) {
     setSidebar(px) {
       lastSetSidebarWidth = px;
       sidebarRoot.style.width = `${px}px`;
+    },
+    setRightbar(px) {
+      lastSetRightbarWidth = px;
     },
     toggleSidebar() {
       toggleCount++;
@@ -882,6 +886,8 @@ function createTestEnv(options = {}) {
     layout, uiWorkspace, ctx, openedSessions,
     getToggleCount: () => toggleCount,
     getLastSidebarWidth: () => lastSetSidebarWidth,
+    getLastRightbarWidth: () => lastSetRightbarWidth,
+    emitRawPanelSnapshot: (rawSnap) => panelListeners.forEach((fn) => fn(rawSnap)),
     setSession: (sid) => { currentSessionId = sid; sessionListeners.forEach((fn) => fn({ sessionId: sid })); },
     createPanelRow, createMoreMenu, applyPlugin, advanceTime,
     flushMicrotasks: () => new Promise((r) => setTimeout(r, 0)),
@@ -1611,7 +1617,7 @@ test("性能优化：零根级 :has()、零通配符拖拽 CSS、GPU 幽灵分�
   // 9) 卸载清理零残留（包括幽灵分割线 DOM 与 html 上的 data-codex-* 属性）
   cleanup();
   assert.equal(env.doc.getElementById("dsh-codex-drag-sash"), null, "卸载后应彻底移除幽灵分割线节点");
-  for (const attr of ["data-codex-drawer", "data-codex-collapsed", "data-codex-wallpaper", "data-codex-dragging"]) {
+  for (const attr of ["data-codex-drawer", "data-codex-collapsed", "data-codex-peeking", "data-codex-wallpaper", "data-codex-dragging"]) {
     assert.equal(html.hasAttribute(attr), false, `卸载后 html 不得残留 ${attr}`);
   }
   assert.equal(env.stats().timeouts, 0);
@@ -1757,6 +1763,252 @@ test("DSH 0.2.3-alpha 兼容：新 CSS Module 前缀、panelTrailing 角标提�
   assert.equal(railReviewBtn.querySelector(".dsh-codex-badge")?.textContent, "12");
 
   cleanup();
+  assert.equal(env.stats().winListeners, 0);
+  assert.equal(env.stats().docListeners, 0);
+});
+
+test("v1.3.17 CSS 隔离安全（contain: style / z-index: 68）与 DSH 0.2.2-rc.3 _5Qcc8a_root 账户槽覆盖", () => {
+  const env = createTestEnv();
+
+  // 还原 DSH 0.2.2-rc.3 settingsArea 结构（直接子级 _5Qcc8a_root + 兄弟 _noticeRow）
+  env.settingsArea.innerHTML = "";
+  const noticeRow = env.doc.createElement("div");
+  noticeRow.className = "VOzbGW_noticeRow";
+  noticeRow.innerHTML = '<div class="VOzbGW_notice"><div class="pEg49a_root"><button class="JZqiVa_action">忽略</button></div></div>';
+  const accRoot = env.doc.createElement("div");
+  accRoot.className = "_5Qcc8a_root";
+  accRoot.innerHTML = '<span class="_5Qcc8a_anchor"><button type="button"><span class="_5Qcc8a_avatar"><img src="https://example.com/a.png" /></span><svg viewBox="0 0 16 16"></svg><span class="_5Qcc8a_label">账号</span></button></span>';
+  env.settingsArea.appendChild(noticeRow);
+  env.settingsArea.appendChild(accRoot);
+
+  const cleanup = env.applyPlugin();
+  const styleText = env.doc.getElementById("dsh-codex-sidebar-style").textContent;
+
+  // 1) 顶栏导航层级应低于原生模态框 (1000)，且不建立 contain: layout 包含块
+  const navBlockMatch = /#dsh-codex-titlebar-nav\s*\{([^}]*)\}/.exec(styleText);
+  assert.ok(navBlockMatch, "应存在 #dsh-codex-titlebar-nav 规则");
+  assert.ok(navBlockMatch[1].includes("z-index: 68;"), "顶栏导航 z-index 应降至 68 避免穿透模态框");
+  assert.equal(navBlockMatch[1].includes("contain: layout"), false);
+  assert.ok(navBlockMatch[1].includes("contain: style;"));
+
+  // 2) 活动栏容器不得使用 contain: paint 或 translateZ(0)，避免裁剪向外展开的通知卡片
+  const railBlockMatch = /(?:^|\n)\s*#dsh-codex-sidebar-rail\s*\{([^}]*)\}/.exec(styleText);
+  assert.ok(railBlockMatch, "应存在 #dsh-codex-sidebar-rail 规则");
+  assert.equal(railBlockMatch[1].includes("contain: layout style paint"), false, "活动栏不得使用 contain: paint 硬裁外展通知卡片");
+  assert.equal(railBlockMatch[1].includes("transform: translateZ(0)"), false, "活动栏不得使用 translateZ(0) 制造 fixed 包含块陷阱");
+  assert.ok(railBlockMatch[1].includes("contain: style;"));
+
+  // 3) 主栏列仅使用 contain: style，不诱捕 dsh-claude-style / Popover 的 position: fixed 元素
+  assert.equal(styleText.includes("mP3x-q_sidebarCol"), true);
+  assert.equal(/\.mP3x-q_mainPanel\s*\{\s*contain:\s*layout/.test(styleText), false, "主框架列不得使用 contain: layout");
+
+  // 4) 全样式表 :has() 行数严格维持 2 条，且完整覆盖 > [class*="_settingsArea"] > [class*="_root"] 的 avatar/img/svg/label/hover
+  const hasLines = styleText.split("\n").filter((line) => line.includes(":has("));
+  assert.equal(hasLines.length, 2, "全样式表 :has() 必须严格维持 2 行");
+  assert.ok(styleText.includes('> [class*="_settingsArea"] > [class*="_root"]:not([class*="_notice"]):not([class*="_notifications"]) button [class*="avatar" i]'));
+  assert.ok(styleText.includes('> [class*="_settingsArea"] > [class*="_root"]:not([class*="_notice"]):not([class*="_notifications"]) button svg'));
+  assert.ok(styleText.includes('> [class*="_settingsArea"] > [class*="_root"]:not([class*="_notice"]):not([class*="_notifications"]) button img'));
+
+  cleanup();
+  assert.equal(env.stats().timeouts, 0);
+  assert.equal(env.stats().winListeners, 0);
+  assert.equal(env.stats().docListeners, 0);
+});
+
+test("v1.3.17 Hover Peek 零跳动预览（保持折叠态防 40px 抖动）与主页按钮运行态气泡免抢占", async () => {
+  const env = createTestEnv({ reducedMotion: true });
+  env.frame.setAttribute("data-sidebar-collapsed", "true");
+  env.frame.setAttribute("data-rightbar-collapsed", "true");
+  env.sidebarRoot.classList.add("wtg9ga_collapsed");
+
+  const runRow = env.doc.createElement("div");
+  runRow.setAttribute("data-row-key", "session:running-1");
+  runRow.innerHTML = '<span data-state="ongoing"></span>';
+  env.regionArea.appendChild(runRow);
+
+  const cleanup = env.applyPlugin();
+  const html = env.doc.documentElement;
+  const homeBtn = env.doc.getElementById("dsh-codex-btn-home");
+  const titleToggle = env.doc.getElementById("dsh-codex-btn-title-toggle");
+
+  // 1) 折叠态悬停主页按钮：绝不触发 Hover Peek，且能正常显示 450ms 运行会话提示气泡
+  homeBtn.__hover = true;
+  homeBtn.dispatchEvent({ type: "pointerover", bubbles: true, pointerType: "mouse" });
+  env.advanceTime(460);
+  await env.flushMicrotasks();
+  assert.equal(env.frame.hasAttribute("data-codex-sidebar-peek"), false, "悬停主页按钮不得误触发 Hover Peek");
+  const tip = env.doc.getElementById("dsh-codex-floating-tooltip");
+  assert.equal(tip.classList.contains("visible"), true, "悬停主页按钮应完整显示运行态 Tooltip");
+  assert.ok(tip.textContent.includes("主页与工作区 · 1 个会话运行中"));
+  homeBtn.__hover = false;
+  homeBtn.dispatchEvent({ type: "pointerout", bubbles: true, relatedTarget: env.doc.body });
+
+  // 2) 悬停标题栏折叠按钮触发 Hover Peek：html 应同时保留 data-codex-collapsed="1" 与 data-codex-peeking="1"，防止 40px 跳动
+  titleToggle.dispatchEvent({ type: "pointerover", bubbles: true, pointerType: "mouse" });
+  env.advanceTime(250);
+  await env.flushMicrotasks();
+  assert.equal(env.frame.getAttribute("data-codex-sidebar-peek"), "open");
+  assert.equal(html.getAttribute("data-codex-collapsed"), "1", "Peek 浮层期间应保持 data-codex-collapsed 防止新会话按钮消失跳动");
+  assert.equal(html.getAttribute("data-codex-peeking"), "1", "Peek 期间应设置 data-codex-peeking 标记");
+  assert.equal(titleToggle.getAttribute("data-tooltip"), "固定展开侧边栏", "Peek 期间切换按钮应提示固定展开侧边栏");
+  assert.equal(homeBtn.classList.contains("active"), false, "Peek 浮层预览期间主页按钮不应提前激活");
+
+  // 3) 点击标题栏折叠按钮固定展开：瞬时清除 peeking 与 collapsed 标记并激活主页
+  titleToggle.click();
+  assert.equal(env.frame.hasAttribute("data-codex-sidebar-peek"), false);
+  assert.equal(html.hasAttribute("data-codex-peeking"), false);
+  assert.equal(html.hasAttribute("data-codex-collapsed"), false);
+  assert.equal(titleToggle.getAttribute("data-tooltip"), "收起侧边栏");
+  assert.equal(homeBtn.classList.contains("active"), true);
+
+  cleanup();
+  assert.equal(env.stats().timeouts, 0);
+  assert.equal(env.stats().winListeners, 0);
+  assert.equal(env.stats().docListeners, 0);
+});
+
+test("v1.3.17 DragSash 进阶：右栏 CENTER_MIN 钳位、左拖收起保宽、pageZoom 精确提交、双击右栏重置与 blur 取消", async () => {
+  const env = createTestEnv();
+  const handle = env.doc.createElement("div");
+  handle.className = "mP3x-q_handle";
+  handle.setAttribute("data-side", "sidebar");
+  handle._rect = { left: 308, top: 40, right: 316, bottom: 800, width: 8, height: 760 };
+  env.frame.appendChild(handle);
+
+  const rightHandle = env.doc.createElement("div");
+  rightHandle.className = "mP3x-q_handle";
+  rightHandle.setAttribute("data-side", "rightbar");
+  rightHandle._rect = { left: 826, top: 40, right: 834, bottom: 800, width: 8, height: 760 };
+  env.frame.appendChild(rightHandle);
+
+  const rightbarCol = env.doc.createElement("div");
+  rightbarCol.className = "mP3x-q_rightbarCol";
+  rightbarCol._rect = { left: 830, top: 40, right: 1280, bottom: 800, width: 450, height: 760 };
+  env.frame.appendChild(rightbarCol);
+
+  const statsLeft = { up: 0, cancel: 0 };
+  const statsRight = { cancel: 0 };
+  handle.addEventListener("pointerup", () => { statsLeft.up++; });
+  handle.addEventListener("pointercancel", () => { statsLeft.cancel++; });
+  rightHandle.addEventListener("pointercancel", () => { statsRight.cancel++; });
+
+  const cleanup = env.applyPlugin();
+
+  // 1) 右侧栏大幅左拖：钳位在 frameWidth(1232) - sidebar(264) - CENTER_MIN(400) = 568 px
+  rightHandle.dispatchEvent({ type: "pointerdown", button: 0, pointerId: 10, clientX: 830, clientY: 200, bubbles: true });
+  rightHandle.dispatchEvent({ type: "pointermove", pointerId: 10, clientX: 400, clientY: 200, bubbles: true });
+  env.advanceTime(20);
+  const sash = env.doc.getElementById("dsh-codex-drag-sash");
+  const pill = env.doc.getElementById("dsh-codex-drag-sash-pill");
+  assert.equal(pill.textContent, "568 px", "右侧栏最大预览宽度应严格遵循宿主 CENTER_MIN=400 钳位为 568 px");
+  rightHandle.dispatchEvent({ type: "keydown", key: "Escape", bubbles: true });
+
+  // 2) 双击右侧栏手柄：重置为 frameWidth * 0.45 = 554 px
+  rightHandle.dispatchEvent({ type: "dblclick", bubbles: true });
+  assert.equal(env.getLastRightbarWidth(), Math.round(1232 * 0.45));
+
+  // 3) 左侧栏左拖超过折叠阈值 (< 148px)：提示“松手收起侧边栏”，松手后发 pointercancel 保留原宽并自动收起侧边栏
+  handle.dispatchEvent({ type: "pointerdown", button: 0, pointerId: 11, clientX: 312, clientY: 200, bubbles: true });
+  handle.dispatchEvent({ type: "pointermove", pointerId: 11, clientX: 120, clientY: 200, bubbles: true });
+  env.advanceTime(20);
+  assert.equal(pill.textContent, "松手收起侧边栏");
+  assert.equal(pill.getAttribute("data-at-collapse"), "1");
+  assert.equal(sash.style.transform, "translate3d(48px, 0, 0)");
+
+  handle.dispatchEvent({ type: "pointerup", button: 0, pointerId: 11, clientX: 120, clientY: 200, bubbles: true });
+  assert.equal(statsLeft.up, 0, "触发拖拽折叠时必须拦截宿主 pointerup 以保留用户原侧栏宽度");
+  assert.equal(statsLeft.cancel, 1, "触发拖拽折叠时必须向手柄派发 pointercancel");
+  assert.equal(env.frame.hasAttribute("data-sidebar-collapsed"), true, "松手后应自动收起侧边栏");
+  assert.equal(env.getLastSidebarWidth(), null, "折叠不应调用 setSidebar 覆盖原有宽度");
+
+  // 4) pageZoom=1.25 下拖拽左栏：直接精确提交缩放换算后的宽度 (304px) 并拦截未缩放宿主 pointerup
+  env.layout.toggleSidebar();
+  env.doc.body.setAttribute("data-dsh-claude-page-zoom", "1.25");
+  env.frame._rect = { left: 60, top: 50, right: 1600, bottom: 1000, width: 1540, height: 950 };
+  env.sidebarCol._rect = { left: 60, top: 50, right: 390, bottom: 1000, width: 330, height: 950 };
+  handle._rect = { left: 385, top: 50, right: 395, bottom: 1000, width: 10, height: 950 };
+
+  handle.dispatchEvent({ type: "pointerdown", button: 0, pointerId: 12, clientX: 390, clientY: 250, bubbles: true });
+  handle.dispatchEvent({ type: "pointermove", pointerId: 12, clientX: 440, clientY: 250, bubbles: true });
+  env.advanceTime(20);
+  assert.equal(pill.textContent, "304 px", "1.25 缩放下右移 50px 视觉像素应等价 40px 布局宽度 (304 px)");
+
+  handle.dispatchEvent({ type: "pointerup", button: 0, pointerId: 12, clientX: 440, clientY: 250, bubbles: true });
+  assert.equal(statsLeft.up, 0, "zoom != 1 时应拦截宿主未除缩放的 pointerup");
+  assert.equal(statsLeft.cancel, 2);
+  assert.equal(env.getLastSidebarWidth(), 304, "应通过 layout.setSidebar 精确提交 304px");
+
+  // 5) 拖拽中 window.blur：向手柄派发 pointercancel 释放捕获并退出拖拽态
+  handle.dispatchEvent({ type: "pointerdown", button: 0, pointerId: 13, clientX: 390, clientY: 250, bubbles: true });
+  env.win.dispatchEvent({ type: "blur" });
+  assert.equal(statsLeft.cancel, 3, "window.blur 应向手柄派发 pointercancel 防止捕获卡死");
+  assert.equal(env.doc.documentElement.hasAttribute("data-codex-dragging"), false);
+
+  cleanup();
+  assert.equal(env.stats().timeouts, 0);
+  assert.equal(env.stats().winListeners, 0);
+  assert.equal(env.stats().docListeners, 0);
+});
+
+test("v1.3.17 layout.panelInfo 全量 Store 快照兼容、_regionArea 流式优化与特殊引号 sessionId", async () => {
+  const env = createTestEnv();
+  env.createPanelRow("plugins", "插件");
+  const cleanup = env.applyPlugin();
+
+  const homeBtn = env.doc.getElementById("dsh-codex-btn-home");
+  const toolsBox = env.doc.getElementById("dsh-codex-sidebar-tools");
+  const pluginBtn = toolsBox.children[0];
+
+  // 1) 兼容 { panelInfo: { activePanelId }, layoutInfo } 嵌套全量 Store 快照
+  env.emitRawPanelSnapshot({ panelInfo: { activePanelId: "plugins" }, layoutInfo: {} });
+  assert.equal(pluginBtn.classList.contains("active"), true, "嵌套 panelInfo 快照也应瞬时高亮对应面板按钮");
+  assert.equal(homeBtn.classList.contains("active"), false);
+
+  env.emitRawPanelSnapshot({ panelInfo: { activePanelId: null }, layoutInfo: {} });
+  assert.equal(pluginBtn.classList.contains("active"), false);
+  assert.equal(homeBtn.classList.contains("active"), true);
+
+  // 等待首次挂载产生的初始 DOM 变更队列排空后再监测 _regionArea 流式隔离效果
+  await env.flushMicrotasks();
+  env.advanceTime(120);
+
+  // 2) _regionArea 流式输出高频变化仅走轻量徽标节流，绝不触发全量 syncAll() 扫描 panelList
+  let panelQueries = 0;
+  const origQueryAll = env.panelList.querySelectorAll.bind(env.panelList);
+  env.panelList.querySelectorAll = (sel) => {
+    panelQueries++;
+    return origQueryAll(sel);
+  };
+
+  const specialSid = 's-"quote"';
+  const row = env.doc.createElement("div");
+  row.setAttribute("data-row-key", `session:${specialSid}`);
+  row.innerHTML = '<span class="rowTitle">含引号会话测试</span>';
+  env.regionArea.appendChild(row);
+  const streamChunk = env.doc.createElement("span");
+  streamChunk.setAttribute("data-state", "ongoing");
+  streamChunk.textContent = "流式输出 token...";
+  row.appendChild(streamChunk);
+
+  await env.flushMicrotasks();
+  env.advanceTime(120);
+  assert.equal(homeBtn.getAttribute("data-codex-running-count"), "1", "应通过轻量通道同步运行会话数量");
+  assert.equal(panelQueries, 0, "_regionArea 内流式节点突变绝不得触发全量 syncAll()");
+
+  // 3) 含特殊引号的 sessionId 在历史导航与标题读取下不报错且正常回退
+  env.setSession("s-init");
+  env.setSession(specialSid);
+  const backBtn = env.doc.getElementById("dsh-codex-btn-back");
+  env.setSession("s-next");
+  assert.equal(backBtn.getAttribute("data-tooltip"), "后退 · 含引号会话测试");
+  backBtn.click();
+  assert.equal(env.uiWorkspace.selection.getSnapshot().sessionId, specialSid);
+
+  cleanup();
+  assert.equal(env.stats().timeouts, 0);
+  assert.equal(env.stats().intervals, 0);
+  assert.equal(env.stats().mutationObservers, 0);
+  assert.equal(env.stats().resizeObservers, 0);
   assert.equal(env.stats().winListeners, 0);
   assert.equal(env.stats().docListeners, 0);
 });
